@@ -324,7 +324,12 @@ export default function PrizeWheel() {
         <span>EST. 2026</span>
       </footer>
       {modalOpen && winner && (
-        <ResultModal prize={winner} onClose={closeResult} />
+        <ResultModal
+          prize={winner}
+          onKeep={() => closeResult()}
+          onRemove={() => closeResult(true)}
+          canRemove={game.canRemoveWinner}
+        />
       )}
     </div>
   );

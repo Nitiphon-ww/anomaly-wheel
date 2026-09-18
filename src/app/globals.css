@@ -591,6 +591,21 @@ h1 em {
   color: #967d87;
   margin-top: 24px;
 }
+.result-actions {
+  display: grid;
+  gap: 12px;
+}
+.result-dialog .result-keep {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid #e2b57180;
+  box-shadow: none;
+}
+.result-dialog #result-minimum {
+  margin: 0;
+  color: #bda7ac;
+  font-size: 12px;
+}
 .confetti {
   position: absolute;
   inset: 0;

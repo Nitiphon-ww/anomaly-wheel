@@ -7,6 +7,14 @@ export const MAX_LABEL_LENGTH = 160;
 export const ITEMS_STORAGE_KEY = "anomaly-wheel.items.v1";
 export const sampleItems = (): Prize[] => PRIZES.map((p) => ({ ...p }));
 
+/** Only the original item list determines whether a result can be removed. */
+export function withoutWinningItem(items: Prize[], winner: Prize): Prize[] | null {
+  const remaining = items.filter((item) => item.id !== winner.id);
+  return remaining.length >= MIN_ITEMS && remaining.length === items.length - 1
+    ? remaining
+    : null;
+}
+
 /** Reuse the existing palette; probability remains independent of color/order. */
 export function colorItems(items: readonly Prize[]): Prize[] {
   return items.map((item, i) => ({
