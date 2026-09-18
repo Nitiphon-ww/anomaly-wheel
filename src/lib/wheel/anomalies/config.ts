@@ -1,42 +1,62 @@
 import { ANOMALIES } from "./registry";
 import type { Anomaly, ForcedEvent } from "./types";
 
-export const ANOMALY_CONFIG = { chance: 0.15 } as const;
+export type SpinBehavior = {
+  id: Exclude<ForcedEvent, "random">;
+  name: string;
+  enabled: boolean;
+  anomaly: Anomaly | null;
+};
 
-export function enabledAnomalies(registry: readonly Anomaly[] = ANOMALIES) {
-  return registry.filter((event) => event.enabled);
+export const NORMAL_BEHAVIOR: SpinBehavior = {
+  id: "normal", name: "Normal Spin", enabled: true, anomaly: null,
+};
+
+export function behaviorRegistry(): SpinBehavior[] {
+  return [NORMAL_BEHAVIOR, ...ANOMALIES.map(anomaly => ({
+    id: anomaly.id, name: anomaly.name, enabled: anomaly.enabled, anomaly,
+  }))];
 }
 
-/** Actual Random-mode odds; an empty event pool falls back to normal play. */
-export function anomalyProbabilities(registry: readonly Anomaly[] = ANOMALIES) {
-  const enabledCount = enabledAnomalies(registry).length;
-  const special = enabledCount ? ANOMALY_CONFIG.chance : 0;
-  const perAnomalyPool = enabledCount ? 1 / enabledCount : 0;
-  return {
-    normal: 1 - special,
-    special,
-    enabledCount,
-    perAnomalyPool,
-    perAnomalySpin: special * perAnomalyPool,
-  };
+export function behaviorProbabilities(registry = behaviorRegistry()) {
+  const enabledCount = registry.filter(behavior => behavior.enabled).length;
+  return { enabledCount, perBehavior: enabledCount ? 1 / enabledCount : 0 };
 }
 
-/** Prize selection is independent. Rarity is cosmetic; no cooldown filtering. */
-export function selectAnomaly(
+function randomUint32() {
+  return crypto.getRandomValues(new Uint32Array(1))[0];
+}
+
+/** Rejection sampling avoids the tiny modulo bias when count does not divide 2^32. */
+export function uniformIndex(count: number, random = randomUint32): number {
+  const range = 0x1_0000_0000;
+  if (!Number.isInteger(count) || count < 1 || count > range)
+    throw new Error("Invalid behavior count");
+  const limit = range - (range % count);
+  let ticket: number;
+  do {
+    ticket = random();
+    if (!Number.isInteger(ticket) || ticket < 0 || ticket >= range)
+      throw new Error("Random source must return an unsigned 32-bit integer");
+  } while (ticket >= limit);
+  return ticket % count;
+}
+
+/** One independent uniform draw; no rarity weights, cooldowns or shuffle bag. */
+export function selectBehavior(
   force: ForcedEvent,
-  random: () => number,
-  registry: readonly Anomaly[] = ANOMALIES,
-): Anomaly | null {
-  if (force === "normal") return null;
+  randomIndex: (count: number) => number = uniformIndex,
+  registry: readonly SpinBehavior[] = behaviorRegistry(),
+): SpinBehavior {
   if (force !== "random") {
-    const forced = registry.find((event) => event.id === force);
-    if (!forced) throw new Error("Unknown forced event");
+    const forced = registry.find(behavior => behavior.id === force);
+    if (!forced) throw new Error("Unknown forced behavior");
     return forced;
   }
-  // Stage 1: independent 85/15 normal/special gate.
-  if (random() >= ANOMALY_CONFIG.chance) return null;
-  const enabled = enabledAnomalies(registry);
-  if (!enabled.length) return null;
-  // Stage 2: equal intervals over the dynamically enabled pool.
-  return enabled[Math.floor(random() * enabled.length)];
+  const enabled = registry.filter(behavior => behavior.enabled);
+  if (!enabled.length) throw new Error("Enable at least one spin behavior");
+  const index = randomIndex(enabled.length);
+  if (!Number.isInteger(index) || index < 0 || index >= enabled.length)
+    throw new Error("Invalid random behavior index");
+  return enabled[index];
 }

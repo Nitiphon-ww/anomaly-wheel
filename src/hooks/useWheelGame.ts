@@ -18,7 +18,7 @@ import {
   AnomalyEngine,
   cleanEffects,
 } from "@/lib/wheel/anomalies/anomaly-engine";
-import { selectAnomaly } from "@/lib/wheel/anomalies/config";
+import { selectBehavior } from "@/lib/wheel/anomalies/config";
 import type {
   Anomaly,
   ForcedEvent,
@@ -189,7 +189,7 @@ export function useWheelGame() {
         forcePrize === "random"
           ? selectPrize(items)
           : (items.find((p) => p.id === forcePrize) ?? selectPrize(items));
-      const anomaly = selectAnomaly(forceEvent, randomUnit);
+      const anomaly = selectBehavior(forceEvent).anomaly;
       setSelected(prize);
       setEvent(anomaly);
       audio.current?.unlock();

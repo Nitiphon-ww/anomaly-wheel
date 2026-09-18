@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test src/lib/wheel/wheel.test.ts src/lib/wheel/anomalies/anomalies.test.ts src/lib/wheel/anomalies/dynamic.test.ts"
+    "test": "tsx --test src/lib/wheel/wheel.test.ts src/lib/wheel/anomalies/anomalies.test.ts src/lib/wheel/anomalies/dynamic.test.ts",
+    "simulate:behaviors": "tsx scripts/simulate-behaviors.ts"
   },
   "dependencies": {
     "next": "16.3.5",
@@ -26,4 +27,3 @@
     "typescript": "^5"
   }
 }
-

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { PRIZES } from "../prizes";
 import { AnomalyEngine, cleanEffects } from "./anomaly-engine";
 import { ANOMALIES } from "./registry";
-import { ANOMALY_CONFIG, anomalyProbabilities, selectAnomaly } from "./config";
+import { behaviorRegistry, behaviorProbabilities, selectBehavior, uniformIndex } from "./config";
 import {
   arcPath,
   boundaries,
@@ -209,46 +209,49 @@ test("failure in a controller or cleanup restores baseline and unlocks engine", 
   assertClean(f.engine, f.clock);
 });
 
-test("85/15 gate and equal dynamic enabled pools, independent of rarity and history", () => {
-  assert.equal(ANOMALY_CONFIG.chance, 0.15);
-  for (const count of [1, 2, 5, 8, 11]) {
-    const registry = ANOMALIES.map((event, i) => ({ ...event, enabled: i < count }));
-    const enabled = registry.filter(event => event.enabled);
-    const picks = new Map<string, number>();
-    // A stratified sweep gives every equal interval exactly 100 tickets.
-    for (let i = 0; i < count * 100; i++) {
-      let calls = 0;
-      const picked = selectAnomaly("random", () => calls++ === 0 ? 0.149999 : (i + .5) / (count * 100), registry)!;
-      assert.equal(calls, 2);
-      picks.set(picked.id, (picks.get(picked.id) ?? 0) + 1);
+test("one uniform pool includes Normal and supports dynamically disabled behaviors", () => {
+  for (const count of [1, 2, 5, 8, 10, 12]) {
+    for (const reverse of [false, true]) {
+      const all = behaviorRegistry();
+      if (reverse) all.reverse(); // Also tests pools where Normal is disabled.
+      const registry = all.map((behavior, i) => ({...behavior, enabled: i < count}));
+      const enabled = registry.filter(behavior => behavior.enabled);
+      assert.deepEqual(behaviorProbabilities(registry), {enabledCount:count,perBehavior:1/count});
+      for (let i = 0; i < count; i++) {
+        let calls=0;
+        assert.equal(selectBehavior("random", size => { calls++; assert.equal(size,count); return i; },registry),enabled[i]);
+        assert.equal(calls,1);
+      }
+      for(let i=0;i<3;i++) assert.equal(selectBehavior("random",()=>0,registry),enabled[0],"consecutive repeats allowed");
     }
-    enabled.forEach(event => assert.equal(picks.get(event.id), 100));
-    for (let i = 0; i < count; i++) {
-      let call = 0;
-      assert.equal(selectAnomaly("random", () => call++ === 0 ? 0 : i / count, registry)?.id, enabled[i].id);
-    }
-    const odds = anomalyProbabilities(registry);
-    assert.equal(odds.enabledCount, count);
-    assert.equal(odds.normal, .85);
-    assert.equal(odds.special, .15);
-    assert.equal(odds.perAnomalyPool, 1 / count);
-    assert.equal(odds.perAnomalySpin, .15 / count);
-    // Repeated selection is allowed: no cooldown silently changes eligibility.
-    for (let i = 0; i < 3; i++) assert.equal(selectAnomaly("random", () => 0, registry)?.id, enabled[0].id);
   }
-  let gateCalls = 0;
-  assert.equal(selectAnomaly("random", () => { gateCalls++; return .15; }), null);
-  assert.equal(gateCalls, 1);
-  const disabled = ANOMALIES.map(event => ({...event, enabled:false}));
-  assert.equal(selectAnomaly("random", () => 0, disabled), null);
-  assert.deepEqual(anomalyProbabilities(disabled), {normal:1,special:0,enabledCount:0,perAnomalyPool:0,perAnomalySpin:0});
+  const disabled=behaviorRegistry().map(behavior=>({...behavior,enabled:false}));
+  assert.deepEqual(behaviorProbabilities(disabled),{enabledCount:0,perBehavior:0});
+  assert.throws(()=>selectBehavior("random",()=>0,disabled),/Enable at least one/);
 });
 
-test("all forced events bypass random draws and enabled flags", () => {
-  const noRoll = () => { throw new Error("must not roll"); };
-  const disabled = ANOMALIES.map(event => ({...event,enabled:false}));
-  for (const event of disabled) assert.equal(selectAnomaly(event.id, noRoll, disabled), event);
-  assert.equal(selectAnomaly("normal", noRoll), null);
+test("rarity and legacy weight/cooldown fields cannot change behavior selection",()=>{
+  const registry=behaviorRegistry().map((behavior,i)=>({...behavior,weight:i===0?10000:0,cooldown:999,anomaly:behavior.anomaly?{...behavior.anomaly,rarity:"Legendary" as const}:null}));
+  registry.forEach((behavior,i)=>assert.equal(selectBehavior("random",()=>i,registry),behavior));
+});
+
+test("all forced behaviors, including Normal, bypass randomness and enabled flags",()=>{
+  const noRoll=()=>{throw new Error("must not roll");};
+  const disabled=behaviorRegistry().map(behavior=>({...behavior,enabled:false}));
+  for(const behavior of disabled) assert.equal(selectBehavior(behavior.id,noRoll,disabled),behavior);
+});
+
+test("uniform integer sampling rejects the biased tail",()=>{
+  let calls=0;
+  assert.equal(uniformIndex(12,()=>calls++===0?0xffffffff:11),11);
+  assert.equal(calls,2);
+  for(const size of [1,2,5,8,10,12]){
+    const counts=Array(size).fill(0);
+    for(let i=0;i<size*100;i++) counts[uniformIndex(size,()=>i)]++;
+    assert.deepEqual(counts,Array(size).fill(100));
+  }
+  assert.throws(()=>uniformIndex(0),/Invalid behavior count/);
+  assert.throws(()=>uniformIndex(12,()=>-1),/unsigned/);
 });
 
 test("unequal/full-circle geometry and bidirectional boundary crossings", () => {

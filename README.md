@@ -20,13 +20,13 @@ Next.js App Router, TypeScript, Tailwind CSS, and a client-side wheel engine. Ph
 - `src/lib/wheel/anomalies/animation-scope.ts`: cancellable animation frames and frame-driven waits; no untracked timers.
 - `src/lib/wheel/anomalies/geometry.ts`: unequal boundaries, full-circle SVG paths, clockwise/counterclockwise targets, pointer-relative landing, and boundary ticks.
 - `src/lib/wheel/anomalies/registry.ts`: eleven independent controllers. Each exposes id, name, enabled, rarity, prepare, play, resolve, and cleanup.
-- `src/lib/wheel/anomalies/config.ts`: centralized 15% anomaly gate and uniform selection from enabled events.
+- `src/lib/wheel/anomalies/config.ts`: one uniform behavior pool, including Normal, with shared probability readouts.
 - `src/lib/wheel/prizes.ts`: immutable sample configuration using `probabilityWeight`. Visual weights are separate runtime data.
 - `src/lib/wheel/audio.ts`: replaceable synthesized spin, tick, elimination, and winning sounds with a master mute and effect cleanup.
 
 ## Selection and landing
 
-On every spin the prize is selected FIRST, using its probability weight and Web Crypto. An independent draw then chooses normal animation (85%) or an anomaly (15%). Within the anomaly branch, every enabled controller has probability `1 / enabledCount`, regardless of rarity. Cooldowns and anomaly weights have been removed. If none are enabled, the engine uses a normal spin. Forced events bypass both random stages and enabled status. Forced prizes bypass prize selection only.
+On every spin the prize is selected FIRST using its probability weight and Web Crypto. Independently, one behavior is drawn uniformly from a single enabled pool containing Normal Spin and all eleven special behaviors. Each has probability `1 / enabledCount` (currently 1/12, approximately 8.33%). Normal has an enabled flag just like the others. Rejection sampling over Web Crypto integers avoids modulo bias. There are no rarity weights, cooldowns, duplicate suppression or shuffled bags. If every behavior is disabled, selection reports an error instead of secretly enabling Normal. Forced behavior selections bypass the random pool and enabled flags; Force Prize stays independent.
 
 The winner never changes during an event. Visual weights do not affect probability. The engine derives each segment's center from cumulative visual weights. A wheel target satisfies `pointerAngle - wheelAngle = winnerCenter (mod 360)`; a pointer target satisfies `pointerAngle = wheelAngle + winnerCenter (mod 360)`. Full turns are added in the intended direction. Final geometry is checked before the predetermined winner reaches the modal.
 
@@ -73,4 +73,4 @@ The main-page Wheel Items editor supports adding, renaming, deleting, moving up/
 
 See [dynamic-items verification](docs/dynamic-items-verification.md) for the revised browser and automated coverage.
 
-Developer Info calculates Random-mode normal/special odds, enabled count, equal pool probability and overall per-spin probability from the same enabled registry. With no enabled events it reports 100% normal and zero special/per-event odds. Forced selections explicitly show that odds are bypassed.
+Developer Info shows Uniform random mode, the enabled behavior count and `1 / enabledCount` probability. Forced selections explicitly show that odds are bypassed. Run `npm run simulate:behaviors` for a development-only 120,000-selection simulation without playing animations.

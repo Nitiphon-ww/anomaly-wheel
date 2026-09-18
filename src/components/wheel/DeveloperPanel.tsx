@@ -1,6 +1,6 @@
 "use client";
 import type { Ref } from "react";
-import { anomalyProbabilities } from "@/lib/wheel/anomalies/config";
+import { behaviorProbabilities } from "@/lib/wheel/anomalies/config";
 import { ANOMALIES } from "@/lib/wheel/anomalies/registry";
 
 import type { Anomaly, ForcedEvent, Status } from "@/lib/wheel/anomalies/types";
@@ -34,7 +34,7 @@ export default function DeveloperPanel({
   angleOutput,
   pointerOutput,
 }: Props) {
-  const odds = anomalyProbabilities();
+  const odds = behaviorProbabilities();
   const percent = (value: number) => `${Number((value * 100).toFixed(2))}%`;
   const busy = status.state !== "IDLE";
   return (
@@ -100,12 +100,10 @@ export default function DeveloperPanel({
         </label>
       </div>
       <div className="developer-grid" aria-label="Random mode probabilities">
-        <div><label>Normal Spin</label><output>{percent(odds.normal)}</output></div>
-        <div><label>Special Event</label><output>{percent(odds.special)}</output></div>
-        <div><label>Enabled Anomalies</label><output>{odds.enabledCount}</output></div>
-        <div><label>Chance Per Enabled Anomaly</label><output>{percent(odds.perAnomalyPool)} of anomaly pool</output></div>
-        <div><label>Overall Chance Per Anomaly</label><output>~{percent(odds.perAnomalySpin)} per spin</output></div>
-        <div><label>Probability Mode</label><output>{forceEvent === "random" ? "Random · equal enabled chances" : "Forced event · odds bypassed"}</output></div>
+        <div><label>Random Mode</label><output>Uniform</output></div>
+        <div><label>Enabled Behaviors</label><output>{odds.enabledCount}</output></div>
+        <div><label>Probability Per Behavior</label><output>{percent(odds.perBehavior)}</output></div>
+        <div><label>Selection Mode</label><output>{forceEvent === "random" ? "Random · uniform pool" : "Forced behavior · odds bypassed"}</output></div>
       </div>
       <div className="developer-grid">
         <div>
@@ -113,9 +111,9 @@ export default function DeveloperPanel({
           <output data-testid="selected-prize">{selected?.label ?? "—"}</output>
         </div>
         <div>
-          <label>Selected Anomaly</label>
+          <label>Selected Behavior</label>
           <output data-testid="selected-anomaly">
-            {event?.name ?? "Normal"}
+            {event?.name ?? "Normal Spin"}
           </output>
         </div>
         <div>
