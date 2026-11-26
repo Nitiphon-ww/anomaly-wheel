@@ -5,10 +5,14 @@ import type { Prize } from "@/types/wheel";
 
 export default function ResultModal({
   prize,
-  onClose,
+  onKeep,
+  onRemove,
+  canRemove,
 }: {
   prize: Prize;
-  onClose: () => void;
+  onKeep: () => void;
+  onRemove: () => void;
+  canRemove: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -25,7 +29,7 @@ export default function ResultModal({
       aria-describedby="result-description"
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        onKeep();
       }}
     >
       <div className="confetti" aria-hidden="true">
@@ -45,8 +49,8 @@ export default function ResultModal({
       </div>
       <button
         className="modal-close"
-        onClick={onClose}
-        aria-label="Close result"
+        onClick={onKeep}
+        aria-label="Keep item and close result"
       >
         ×
       </button>
@@ -57,11 +61,33 @@ export default function ResultModal({
         {prize.label}
       </p>
       <p id="result-description">
+<<<<<<< HEAD
         Close this to spin again.
       </p>
       <button className="spin-button" onClick={onClose}>
         Back to the wheel
       </button>
+=======
+        Remove this result from the next spin?
+      </p>
+      <div className="result-actions">
+        <button
+          className="spin-button"
+          onClick={onRemove}
+          disabled={!canRemove}
+          aria-describedby={!canRemove ? "result-minimum" : undefined}
+        >
+          REMOVE &amp; SPIN AGAIN <span aria-hidden="true">↗</span>
+        </button>
+        {!canRemove && (
+          <p id="result-minimum">At least 2 items are required to spin.</p>
+        )}
+        <button className="spin-button result-keep" onClick={onKeep}>
+          KEEP &amp; SPIN AGAIN <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+      <p className="modal-note">ONE SPIN. A NEW POSSIBILITY.</p>
+>>>>>>> 7bb0f1625abbb2bf2b58f2e12d56f862a1dfba8e
     </dialog>
   );
 }

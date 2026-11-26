@@ -525,6 +525,30 @@ h1 {
 .result-dialog .spin-button {
   width: 100%;
 }
+<<<<<<< HEAD
+=======
+.modal-note {
+  font-size: 8px;
+  letter-spacing: 1.8px;
+  color: #967d87;
+  margin-top: 24px;
+}
+.result-actions {
+  display: grid;
+  gap: 12px;
+}
+.result-dialog .result-keep {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid #e2b57180;
+  box-shadow: none;
+}
+.result-dialog #result-minimum {
+  margin: 0;
+  color: #bda7ac;
+  font-size: 12px;
+}
+>>>>>>> 7bb0f1625abbb2bf2b58f2e12d56f862a1dfba8e
 .confetti {
   position: absolute;
   inset: 0;

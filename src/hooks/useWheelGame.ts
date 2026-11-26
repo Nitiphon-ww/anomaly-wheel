@@ -10,6 +10,7 @@ import {
   parseItems,
   ITEMS_STORAGE_KEY,
   MAX_ITEMS,
+  withoutWinningItem,
 } from "@/lib/wheel/items";
 import { PRIZES } from "@/lib/wheel/prizes";
 import { randomUnit, selectPrize } from "@/lib/wheel/probability";
@@ -62,6 +63,7 @@ export function useWheelGame() {
   const audio = useRef<SynthWheelAudio | null>(null);
   const engine = useRef<AnomalyEngine | null>(null);
   const locked = useRef(false);
+  const closingResult = useRef(false);
   const mounted = useRef(false);
   const completed = useRef(0);
 
@@ -220,8 +222,12 @@ export function useWheelGame() {
       );
     }
   };
-  const closeResult = async () => {
-    if (!modalOpen) return;
+  const canRemoveWinner = !!winner && withoutWinningItem(items, winner) !== null;
+  const closeResult = async (removeWinner = false) => {
+    if (!modalOpen || !winner || closingResult.current) return;
+    const remaining = removeWinner ? withoutWinningItem(items, winner) : null;
+    if (removeWinner && !remaining) return;
+    closingResult.current = true;
     setModalOpen(false);
     audio.current?.stopEffects();
     try {
@@ -233,8 +239,18 @@ export function useWheelGame() {
       pointerAnimation.current?.cancel();
       if (mounted.current) {
         locked.current = false;
+        // Cleanup must finish against the original list before replacing geometry.
+        if (remaining) changeItems(remaining);
+        else {
+          engine.current?.setPrizes(items);
+          setSelected(null);
+          setWinner(null);
+          setEvent(null);
+        }
+        audio.current?.stopEffects();
         button.current?.focus();
       }
+      closingResult.current = false;
     }
   };
   const toggleSound = () => {
@@ -278,6 +294,7 @@ export function useWheelGame() {
     pointerOutput,
     start,
     closeResult,
+    canRemoveWinner,
     toggleSound,
   };
 }

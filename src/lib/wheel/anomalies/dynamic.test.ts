@@ -7,10 +7,11 @@ import {
   serializeItems,
   spinValidation,
   fitSegmentLabel,
+  withoutWinningItem,
 } from "../items";
 import { AnomalyEngine, cleanEffects } from "./anomaly-engine";
 import { ANOMALIES } from "./registry";
-import { indexAtPointer } from "./geometry";
+import { boundaries, indexAtPointer } from "./geometry";
 import type { Scheduler } from "./types";
 
 class Clock implements Scheduler {
@@ -60,6 +61,46 @@ const itemsFor = (n: number) =>
       label: `Item ${i + 1}`,
     })),
   );
+
+for (const anomaly of [null, ...ANOMALIES]) {
+  for (const remove of [false, true]) {
+    test(`${anomaly?.id ?? "normal"}: ${remove ? "remove" : "keep"} result restores full geometry and permits next spin`, async () => {
+      const items = itemsFor(8);
+      items[0].label = items[3].label = "Pizza";
+      const original = serializeItems(items);
+      const clock = new Clock();
+      const engine = new AnomalyEngine(items, {
+        onFrame() {}, onVisual() {}, onStatus() {}, onTick() {}, onSpinAudio() {},
+      }, clock);
+      const winner = await clock.settle(engine.run(items[3], anomaly, () => 0.37));
+      await clock.settle(engine.close());
+      const next = remove ? colorItems(withoutWinningItem(items, winner)!) : items;
+      engine.setPrizes(next);
+      assert.equal(serializeItems(items), original, "temporary elimination cannot mutate source items");
+      assert.equal(next.length, remove ? 7 : 8);
+      assert.ok(next.some((item) => item.id === items[0].id), "duplicate label survives");
+      assert.equal(next.some((item) => item.id === winner.id), !remove);
+      assert.deepEqual(parseItems(serializeItems(next)), next);
+      assert.deepEqual(engine.snapshot.visual, { ...cleanEffects(), visualWeights: next.map(() => 1) });
+      assert.equal(engine.snapshot.pointerAngle, 0);
+      assert.equal(engine.snapshot.wheelAngle, 0);
+      assert.equal(engine.snapshot.pendingFrames, 0);
+      const edges = boundaries(engine.snapshot.visual.visualWeights);
+      edges.forEach((angle, i) => assert.ok(Math.abs(angle - i * 360 / next.length) < 1e-9));
+      await clock.settle(engine.run(next[0], null, () => 0.5));
+      assert.equal(indexAtPointer(engine.snapshot.wheelAngle, 0, engine.snapshot.visual.visualWeights), 0);
+      await clock.settle(engine.close());
+      engine.dispose();
+    });
+  }
+}
+
+test("result removal protects minimum items and requires the current winner ID", () => {
+  const items = itemsFor(3);
+  assert.equal(withoutWinningItem(items.slice(0, 2), items[0]), null);
+  assert.equal(withoutWinningItem(items, { ...items[0], id: "unknown" }), null);
+  assert.equal(withoutWinningItem(items, items[0])?.length, 2);
+});
 
 test("items: persistence, validation, colors and long Unicode labels", () => {
   const items = itemsFor(20);

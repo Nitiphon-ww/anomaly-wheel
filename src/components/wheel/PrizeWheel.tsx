@@ -297,7 +297,12 @@ export default function PrizeWheel() {
         <span>Your items stay in this browser.</span>
       </footer>
       {modalOpen && winner && (
-        <ResultModal prize={winner} onClose={closeResult} />
+        <ResultModal
+          prize={winner}
+          onKeep={() => closeResult()}
+          onRemove={() => closeResult(true)}
+          canRemove={game.canRemoveWinner}
+        />
       )}
     </div>
   );
