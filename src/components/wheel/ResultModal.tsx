@@ -61,14 +61,7 @@ export default function ResultModal({
         {prize.label}
       </p>
       <p id="result-description">
-<<<<<<< HEAD
-        Close this to spin again.
-      </p>
-      <button className="spin-button" onClick={onClose}>
-        Back to the wheel
-      </button>
-=======
-        Remove this result from the next spin?
+        Take it off the wheel, or leave it for the next spin?
       </p>
       <div className="result-actions">
         <button
@@ -77,17 +70,15 @@ export default function ResultModal({
           disabled={!canRemove}
           aria-describedby={!canRemove ? "result-minimum" : undefined}
         >
-          REMOVE &amp; SPIN AGAIN <span aria-hidden="true">↗</span>
+          Remove from wheel
         </button>
         {!canRemove && (
-          <p id="result-minimum">At least 2 items are required to spin.</p>
+          <p id="result-minimum">The wheel needs at least 2 items.</p>
         )}
         <button className="spin-button result-keep" onClick={onKeep}>
-          KEEP &amp; SPIN AGAIN <span aria-hidden="true">↗</span>
+          Keep on wheel
         </button>
       </div>
-      <p className="modal-note">ONE SPIN. A NEW POSSIBILITY.</p>
->>>>>>> 7bb0f1625abbb2bf2b58f2e12d56f862a1dfba8e
     </dialog>
   );
 }
