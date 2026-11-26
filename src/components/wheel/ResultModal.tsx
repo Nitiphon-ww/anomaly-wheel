@@ -37,7 +37,7 @@ export default function ResultModal({
                 "--x": `${(i * 37) % 100}%`,
                 "--delay": `${(i % 7) * 0.08}s`,
                 "--tilt": `${i * 49}deg`,
-                background: ["#edc77d", "#db7185", "#56a4a1", "#fff0d2"][i % 4],
+                background: ["#e3b04b", "#ad2943", "#2f8a8f", "#efe3c9"][i % 4],
               } as CSSProperties
             }
           />
@@ -50,25 +50,18 @@ export default function ResultModal({
       >
         ×
       </button>
-      <div className="result-seal" aria-hidden="true">
-        ✦
-      </div>
-      <p className="eyebrow">A LITTLE LUCK, ALL YOURS</p>
-      <h2 id="result-title">YOU WON</h2>
+      <h2 id="result-title">The wheel landed on</h2>
       <p
         className={`result-prize ${prize.label.length > 24 ? "result-prize-long" : ""}`}
       >
         {prize.label}
       </p>
       <p id="result-description">
-        Your lucky moment has arrived.
-        <br />
-        Ready to give it another whirl?
+        Close this to spin again.
       </p>
       <button className="spin-button" onClick={onClose}>
-        BACK TO THE WHEEL <span aria-hidden="true">↗</span>
+        Back to the wheel
       </button>
-      <p className="modal-note">ONE SPIN. A NEW POSSIBILITY.</p>
     </dialog>
   );
 }

@@ -19,9 +19,7 @@ export default function SpinButton({
       disabled={disabled}
       onClick={onSpin}
     >
-      <span aria-hidden="true">✦</span>
-      {spinning ? "SPINNING…" : "SPIN THE WHEEL"}
-      <span aria-hidden="true">↗</span>
+      {spinning ? "Spinning…" : "Spin"}
     </button>
   );
 }

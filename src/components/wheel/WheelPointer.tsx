@@ -8,21 +8,14 @@ export default function WheelPointer({
   return (
     <div className="wheel-pointer" ref={pointerRef} aria-hidden="true">
       <svg viewBox="0 0 48 72">
-        <defs>
-          <linearGradient id="pointer-gold" x2="1" y2="1">
-            <stop stopColor="#fff1bd" />
-            <stop offset=".5" stopColor="#dbaa53" />
-            <stop offset="1" stopColor="#916326" />
-          </linearGradient>
-        </defs>
         <path
-          d="M4 7 Q24 -2 44 7 L24 67 Z"
-          fill="url(#pointer-gold)"
-          stroke="#ffdf96"
-          strokeWidth="2"
+          d="M5 8 Q24 -1 43 8 L24 66 Z"
+          fill="#2a1a14"
+          stroke="#efe3c9"
+          strokeWidth="3"
+          strokeLinejoin="round"
         />
-        <path d="M12 13 L36 13 L24 49 Z" fill="#a52a43" />
-        <circle cx="24" cy="12" r="4" fill="#fff3cc" />
+        <circle cx="24" cy="13" r="5" fill="#e3b04b" />
       </svg>
     </div>
   );

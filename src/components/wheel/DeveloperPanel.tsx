@@ -40,8 +40,8 @@ export default function DeveloperPanel({
   return (
     <details className="developer-panel" open>
       <summary>
-        <span>⌘ &nbsp; DEVELOPER INFO</span>
-        <span>TEMPORARY PANEL</span>
+        <span>Developer tools</span>
+        <span>Remove before release</span>
       </summary>
       <div className="developer-controls">
         <label>

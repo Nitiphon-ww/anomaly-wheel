@@ -36,14 +36,15 @@ export default function PrizeWheel() {
     <div className={`app-shell ${visual.jackpot ? "is-jackpot" : ""}`}>
       <header className="site-header">
         <Link className="wordmark" href="/" aria-label="Anomaly Wheel home">
-          <span className="brand-icon" aria-hidden="true">
-            ✳
-          </span>
-          ANOMALY<span className="wordmark-light">WHEEL</span>
+          <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="15" fill="#efe3c9" />
+            <path d="M16 16 16 3a13 13 0 0 1 11.3 6.5Z" fill="#ad2943" />
+            <path d="M16 16 27.3 22.5A13 13 0 0 1 16 29Z" fill="#2f8a8f" />
+            <path d="M16 16 4.7 22.5A13 13 0 0 1 4.7 9.5Z" fill="#e3b04b" />
+            <circle cx="16" cy="16" r="3" fill="#2a1a14" />
+          </svg>
+          Anomaly Wheel
         </Link>
-        <span className="edition">
-          THE ORIGINAL EDITION <span> / 001</span>
-        </span>
         <button
           className="sound-toggle"
           aria-pressed={sound}
@@ -69,36 +70,22 @@ export default function PrizeWheel() {
               <path d="m16 9 6 6m0-6-6 6" />
             )}
           </svg>
-          <span>SOUND {sound ? "ON" : "OFF"}</span>
+          <span>Sound {sound ? "on" : "off"}</span>
         </button>
       </header>
       <main className="main-content">
         <div className="intro">
-          <div className="eyebrow">
-            <span className="status-dot" /> {items.length} ITEMS. ENDLESS
-            POSSIBILITY.
-          </div>
-          <h1>
-            A little luck.
-            <br className="mobile-break" /> <em>A great spin.</em>
-          </h1>
-          <p>Take a chance. Find your moment. Let the wheel decide.</p>
+          <h1>Spin for it</h1>
+          <p>
+            {items.length} items, same odds for each. Every so often the
+            wheel does something it shouldn&rsquo;t.
+          </p>
         </div>
         <section className="wheel-section" aria-label="Prize wheel game">
-          <div className="orbit-caption left-caption" aria-hidden="true">
-            <span>✧</span>
-            <p>
-              A TURN
-              <br />
-              OF FORTUNE
-            </p>
-            <i />
-          </div>
           <div
             className={`wheel-stage ${visual.glitch ? "is-glitch" : ""}`}
             data-event={game.event?.id ?? "normal"}
           >
-            <div className="wheel-halo" />
             <div className="wheel-frame">
               <svg
                 className="wheel-rotor"
@@ -142,7 +129,7 @@ export default function PrizeWheel() {
                         className={`wheel-segment ${visual.eliminatingIds.includes(prize.id) ? "eliminating-segment" : ""} ${winner?.id === prize.id ? "winning-segment" : ""}`}
                         d={arcPath(edges[index], edges[index + 1])}
                         fill={prize.color}
-                        stroke="#f8d995"
+                        stroke="#efe3c9"
                         strokeWidth="1.6"
                       />
                       <g clipPath={`url(#clip-${prize.id})`}>
@@ -162,7 +149,7 @@ export default function PrizeWheel() {
                           {fitted.text}
                         </text>
                       </g>
-                      <circle cx={peg.x} cy={peg.y} r="4" fill="#fff0ba" />
+                      <circle cx={peg.x} cy={peg.y} r="4" fill="#2a1a14" />
                     </g>
                   );
                 })}
@@ -178,7 +165,7 @@ export default function PrizeWheel() {
                   cy="300"
                   r="271"
                   fill="none"
-                  stroke="#f9db98"
+                  stroke="#2a1a14"
                   strokeWidth="3"
                 />
               </svg>
@@ -195,17 +182,12 @@ export default function PrizeWheel() {
                       cx={p.x}
                       cy={p.y}
                       r="3.3"
-                      fill={index % 2 ? "#f7d08a" : "#fff5d4"}
+                      fill={index % 2 ? "#d9c7a3" : "#fffaf0"}
                     />
                   );
                 })}
               </svg>
-              <div className="wheel-hub" aria-hidden="true">
-                <span>✦</span>
-                <small>GOOD</small>
-                <strong>LUCK</strong>
-                <i>✧</i>
-              </div>
+              <div className="wheel-hub" aria-hidden="true" />
             </div>
             <div className="pointer-orbit" ref={pointerOrbit}>
               <WheelPointer pointerRef={pointer} />
@@ -218,7 +200,7 @@ export default function PrizeWheel() {
             )}
             {visual.earlyPrize && (
               <div className="early-result" role="status">
-                <span>YOU WON</span>
+                <span>Result</span>
                 <strong>{visual.earlyPrize}</strong>
               </div>
             )}
@@ -231,21 +213,10 @@ export default function PrizeWheel() {
                       left: `${(i * 37) % 100}%`,
                       animationDelay: `${i * 0.13}s`,
                     }}
-                  >
-                    ✦
-                  </i>
+                  />
                 ))}
               </div>
             )}
-          </div>
-          <div className="orbit-caption right-caption" aria-hidden="true">
-            <span>{String(items.length).padStart(2, "0")}</span>
-            <p>
-              POSSIBILITIES
-              <br />
-              ONE MOMENT
-            </p>
-            <i />
           </div>
         </section>
         <div className="spin-controls">
@@ -258,18 +229,22 @@ export default function PrizeWheel() {
           />
           <p role="status" aria-live="polite">
             {busy
-              ? "A little anticipation is part of the magic…"
+              ? "The wheel is spinning."
               : game.validation
                 ? game.validation
                 : winner
-                  ? `Last spin: ${winner.label}. Another chance awaits.`
-                  : "Your next lucky moment is one spin away."}
+                  ? `Last result: ${winner.label}`
+                  : "Nothing spun yet."}
           </p>
         </div>
         <section className="prize-strip" aria-label="Available prizes">
           <div className="strip-heading">
-            <span>ON THE WHEEL</span>
-            <span>{items.length} items · equal chances</span>
+            <span>On the wheel</span>
+            <span>
+              {items.length
+                ? `1 in ${items.length} chance each`
+                : "No items yet"}
+            </span>
           </div>
           <div className="prize-list">
             {items.map((prize, index) => (
@@ -285,13 +260,10 @@ export default function PrizeWheel() {
           </div>
         </section>
         <div className="session-row">
-          <span>
-            <span className="session-dot" /> NORMAL PLAY
-          </span>
           <p>
             {history.length ? (
               <>
-                RECENT SPINS{" "}
+                Recent{" "}
                 <span className="history">
                   {history.map((prize, index) => (
                     <span key={index}>{prize.label}</span>
@@ -299,10 +271,12 @@ export default function PrizeWheel() {
                 </span>
               </>
             ) : (
-              "A fresh start. Make your first spin."
+              "No spins this session."
             )}
           </p>
-          <span>{String(spins).padStart(2, "0")} SPINS</span>
+          <span>
+            {spins} {spins === 1 ? "spin" : "spins"}
+          </span>
         </div>
         <WheelItemsEditor
           items={items}
@@ -319,9 +293,8 @@ export default function PrizeWheel() {
         <DeveloperPanel {...game} />
       </main>
       <footer className="site-footer">
-        <span>ANOMALY WHEEL</span>
-        <span>A SMALL MOMENT OF POSSIBILITY.</span>
-        <span>EST. 2026</span>
+        <span>Anomaly Wheel</span>
+        <span>Your items stay in this browser.</span>
       </footer>
       {modalOpen && winner && (
         <ResultModal prize={winner} onClose={closeResult} />

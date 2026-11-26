@@ -31,8 +31,8 @@ export default function WheelItemsEditor({
     <section className="items-editor" aria-labelledby="items-heading">
       <div className="items-editor-heading">
         <div>
-          <h2 id="items-heading">Wheel Items</h2>
-          <p>Your choices. Your next lucky moment.</p>
+          <h2 id="items-heading">Edit the wheel</h2>
+          <p>Rename, reorder or remove items. Changes apply on the next spin.</p>
         </div>
         <span>
           {items.length} {items.length === 1 ? "item" : "items"}
@@ -53,7 +53,7 @@ export default function WheelItemsEditor({
                 value={item.label}
                 maxLength={MAX_LABEL_LENGTH}
                 onChange={(e) => onEdit(item.id, e.target.value)}
-                placeholder="Give this item a name"
+                placeholder="Item name"
                 spellCheck={false}
               />
               <button
@@ -84,7 +84,7 @@ export default function WheelItemsEditor({
           ))}
           {!items.length && (
             <p className="items-empty">
-              A blank wheel. Add a few possibilities below.
+              The wheel is empty. Add at least two items to spin.
             </p>
           )}
         </div>
@@ -95,14 +95,14 @@ export default function WheelItemsEditor({
             disabled={items.length >= MAX_ITEMS}
             onClick={onAdd}
           >
-            + Add Item
+            Add item
           </button>
           <div>
             <button type="button" disabled={!items.length} onClick={onClear}>
               Clear all
             </button>
             <button type="button" onClick={onReset}>
-              Reset to samples
+              Restore defaults
             </button>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function WheelItemsEditor({
           ? "Restoring your items…"
           : busy
             ? "You can edit again when this spin has finished."
-            : notice || `Saved on this device · 2–${MAX_ITEMS} items to spin`}
+            : notice || `Saved in this browser. 2 to ${MAX_ITEMS} items.`}
       </p>
     </section>
   );

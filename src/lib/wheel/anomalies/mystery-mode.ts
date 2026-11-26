@@ -4,14 +4,14 @@ export default defineAnomaly({
   name: "Mystery Mode",
   rarity: "Rare",
   async prepare(c) {
-    c.effects({ concealed: true, message: "Some things are worth the wait." });
+    c.effects({ concealed: true, message: "Labels hidden until it stops." });
     await c.pause(500);
   },
   async play(c) {
     const motion = c.spinToWinner(6500, 6);
     const reveal = (async () => {
       await c.pause(4850);
-      c.effects({ concealed: false, message: "The mystery unfolds." });
+      c.effects({ concealed: false, message: "Labels back." });
       c.phase("MYSTERY_REVEAL");
     })();
     await Promise.all([motion, reveal]);
